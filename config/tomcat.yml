@@ -18,11 +18,11 @@
 tomcat:
   version: 9.+
   repository_root: "{default.repository.root}/tomcat"
-  context_path: 
+  context_path:
   external_configuration_enabled: false
 external_configuration:
   version: 1.+
-  repository_root: 
+  repository_root:
 lifecycle_support:
   version: 3.+
   repository_root: "{default.repository.root}/tomcat-lifecycle-support"
@@ -41,4 +41,4 @@ redis_store:
   connection_pool_size: 2
 geode_store:
   version: 0.+
-  repository_root: https://repo.spring.io/ext-release-local/geode-store
+  repository_root: file:///Users/bross/dev/pcc-tomcat-store/build/distributions
