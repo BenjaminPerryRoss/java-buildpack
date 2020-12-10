@@ -63,7 +63,7 @@ module JavaBuildpack
       KEY_LOCATORS = 'locators'
       KEY_USERS = 'users'
 
-      SESSION_MANAGER_CLASS_NAME = 'org.apache.geode.modules.session.catalina.Tomcat8DeltaSessionManager'
+      SESSION_MANAGER_CLASS_NAME = 'org.apache.geode.modules.session.catalina.Tomcat9DeltaSessionManager'
       REGION_ATTRIBUTES_ID = 'PARTITION_REDUNDANT_HEAP_LRU'
       CACHE_CLIENT_LISTENER_CLASS_NAME =
         'org.apache.geode.modules.session.catalina.ClientServerCacheLifecycleListener'
