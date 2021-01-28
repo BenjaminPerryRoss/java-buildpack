@@ -91,8 +91,13 @@ module JavaBuildpack
       end
 
       def add_listener(server)
+        credentials = @application.services.find_service(FILTER, KEY_LOCATORS, KEY_USERS)['credentials']
+        user = credentials[KEY_USERS].find { |u| cluster_operator?(u) }
+
         server.add_element 'Listener',
-                           'className' => CACHE_CLIENT_LISTENER_CLASS_NAME
+                           'className' => CACHE_CLIENT_LISTENER_CLASS_NAME,
+                           'security-username' => user['username'],
+                           'security-password' => user['password']
       end
 
       def add_locators(pool)
