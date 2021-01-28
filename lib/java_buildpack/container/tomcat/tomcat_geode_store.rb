@@ -40,14 +40,20 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         return unless supports?
-
         credentials = @application.services.find_service(FILTER, KEY_LOCATORS, KEY_USERS)['credentials']
         user = credentials[KEY_USERS].find { |u| cluster_operator?(u) }
+
+        File.open(@droplet.sandbox + "conf/gemfire.properties", "w") {|f| f.write("security-username=" + user['username'] +
+                                                                       "\nsecurity-password=" + user['password'] +
+                                                            "\nsecurity-client-auth-init=io.pivotal.cloudcache.ClientAuthInitialize.create" +
+                                                                                  "\ngemfire.socket-buffer-size=32767") }
 
         @droplet.java_opts.add_system_property 'gemfire.security-username', user['username']
         @droplet.java_opts.add_system_property 'gemfire.security-password', user['password']
         @droplet.java_opts.add_system_property 'gemfire.security-client-auth-init',
                                                'io.pivotal.cloudcache.ClientAuthInitialize.create'
+        #
+        # @droplet.sandbox + 'conf/gemfire.properties'
       end
 
       protected
@@ -96,8 +102,7 @@ module JavaBuildpack
 
         server.add_element 'Listener',
                            'className' => CACHE_CLIENT_LISTENER_CLASS_NAME,
-                           'security-username' => user['username'],
-                           'security-password' => user['password']
+                           'gemfire.socket-buffer-size' => '32767'
       end
 
       def add_locators(pool)
@@ -111,10 +116,16 @@ module JavaBuildpack
       end
 
       def add_manager(context)
+        credentials = @application.services.find_service(FILTER, KEY_LOCATORS, KEY_USERS)['credentials']
+        user = credentials[KEY_USERS].find { |u| cluster_operator?(u) }
+
         context.add_element 'Manager',
                             'className' => SESSION_MANAGER_CLASS_NAME,
                             'enableLocalCache' => 'true',
-                            'regionAttributesId' => REGION_ATTRIBUTES_ID
+                            'regionAttributesId' => REGION_ATTRIBUTES_ID,
+                            'gemfire.security-username' => user['username'],
+                            'gemfire.security-password' => user['password'],
+                            'gemfire.security-client-auth-init' => 'io.pivotal.cloudcache.ClientAuthInitialize.create'
       end
 
       def add_pool(client_cache)
