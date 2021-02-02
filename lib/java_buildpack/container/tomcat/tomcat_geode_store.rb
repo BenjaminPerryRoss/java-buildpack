@@ -32,6 +32,7 @@ module JavaBuildpack
         return unless supports?
 
         download_tar(false, tomcat_lib, tar_name)
+        detect_geode_tomcat_version
         mutate_context
         mutate_server
         create_cache_client_xml
@@ -63,7 +64,7 @@ module JavaBuildpack
       KEY_LOCATORS = 'locators'
       KEY_USERS = 'users'
 
-      SESSION_MANAGER_CLASS_NAME = 'org.apache.geode.modules.session.catalina.Tomcat9DeltaSessionManager'
+      # @session_manager_classname = ''
       REGION_ATTRIBUTES_ID = 'PARTITION_REDUNDANT_HEAP_LRU'
       CACHE_CLIENT_LISTENER_CLASS_NAME =
         'org.apache.geode.modules.session.catalina.ClientServerCacheLifecycleListener'
@@ -72,7 +73,7 @@ module JavaBuildpack
       SCHEMA_LOCATION = 'http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd'
       LOCATOR_REGEXP = Regexp.new('([^\\[]+)\\[([^\\]]+)\\]').freeze
 
-      private_constant :FILTER, :KEY_LOCATORS, :KEY_USERS, :SESSION_MANAGER_CLASS_NAME, :REGION_ATTRIBUTES_ID,
+      private_constant :FILTER, :KEY_LOCATORS, :KEY_USERS, :REGION_ATTRIBUTES_ID,
                        :CACHE_CLIENT_LISTENER_CLASS_NAME, :SCHEMA_URL, :SCHEMA_INSTANCE_URL, :SCHEMA_LOCATION,
                        :LOCATOR_REGEXP
 
@@ -107,7 +108,7 @@ module JavaBuildpack
 
       def add_manager(context)
         context.add_element 'Manager',
-                            'className' => SESSION_MANAGER_CLASS_NAME,
+                            'className' => @session_manager_classname,
                             'enableLocalCache' => 'true',
                             'regionAttributesId' => REGION_ATTRIBUTES_ID
       end
@@ -131,6 +132,23 @@ module JavaBuildpack
         document = REXML::Document.new('<?xml version="1.0" encoding="UTF-8"?>')
         add_client_cache document
         write_xml cache_client_xml_path, document
+      end
+
+      def detect_geode_tomcat_version
+        geode_tomcat_version = ''
+
+        geode_modules_tomcat_pattern = Regexp.new('geode-modules-tomcat([0-9]+).*.jar').freeze
+        Dir.foreach(@droplet.sandbox + 'lib') do |file|
+          if geode_modules_tomcat_pattern.match(file)
+            geode_tomcat_version = geode_modules_tomcat_pattern.match(file).captures[0]
+            break
+          end
+        end
+
+        geode_tomcat_version = '9' if geode_tomcat_version.nil? || geode_tomcat_version.empty?
+        puts "       Detected Geode Tomcat#{geode_tomcat_version} module"
+        @session_manager_classname =
+          "org.apache.geode.modules.session.catalina.Tomcat#{geode_tomcat_version}DeltaSessionManager"
       end
 
       def mutate_context

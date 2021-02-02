@@ -60,12 +60,13 @@ describe JavaBuildpack::Container::TomcatGeodeStore do
 
     it 'copies resources',
        app_fixture: 'container_tomcat_geode_store',
-       cache_fixture: 'stub-geode-store.tar' do
+       cache_fixture: 'stub-geode-store-tomcat8.tar' do
 
       component.compile
 
-      expect(sandbox + 'lib/stub-geode-store/stub-jar-1.jar').to exist
-      expect(sandbox + 'lib/stub-geode-store/stub-jar-2.jar').to exist
+      expect(sandbox + 'lib/stub-jar-1.jar').to exist
+      expect(sandbox + 'lib/stub-jar-2.jar').to exist
+      expect(sandbox + 'lib/geode-modules-tomcat8-1.13.0.jar').to exist
     end
 
     it 'mutates context.xml',
@@ -76,6 +77,16 @@ describe JavaBuildpack::Container::TomcatGeodeStore do
 
       expect((sandbox + 'conf/context.xml').read)
         .to eq(Pathname.new('spec/fixtures/container_tomcat_geode_store_context_after.xml').read)
+    end
+
+    it 'correctly detects Geode Tomcat module version if different from default',
+       app_fixture: 'container_tomcat_geode_store',
+       cache_fixture: 'stub-geode-store-tomcat8.tar' do
+
+      component.compile
+
+      expect((sandbox + 'conf/context.xml').read)
+        .to eq(Pathname.new('spec/fixtures/container_tomcat8_geode_store_context_after.xml').read)
     end
 
     it 'mutates server.xml',
