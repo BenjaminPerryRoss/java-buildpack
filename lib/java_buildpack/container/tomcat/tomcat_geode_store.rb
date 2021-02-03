@@ -64,7 +64,6 @@ module JavaBuildpack
       KEY_LOCATORS = 'locators'
       KEY_USERS = 'users'
 
-      # @session_manager_classname = ''
       REGION_ATTRIBUTES_ID = 'PARTITION_REDUNDANT_HEAP_LRU'
       CACHE_CLIENT_LISTENER_CLASS_NAME =
         'org.apache.geode.modules.session.catalina.ClientServerCacheLifecycleListener'
@@ -137,10 +136,10 @@ module JavaBuildpack
       def detect_geode_tomcat_version
         geode_tomcat_version = ''
 
-        geode_modules_tomcat_pattern = Regexp.new('geode-modules-tomcat([0-9]+).*.jar').freeze
+        geode_modules_tomcat_pattern = /geode-modules-tomcat(?<version>[0-9]+).*.jar/.freeze
         Dir.foreach(@droplet.sandbox + 'lib') do |file|
           if geode_modules_tomcat_pattern.match(file)
-            geode_tomcat_version = geode_modules_tomcat_pattern.match(file).captures[0]
+            geode_tomcat_version = geode_modules_tomcat_pattern.match(file).named_captures['version']
             break
           end
         end
