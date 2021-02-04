@@ -89,6 +89,16 @@ describe JavaBuildpack::Container::TomcatGeodeStore do
         .to eq(Pathname.new('spec/fixtures/container_tomcat8_geode_store_context_after.xml').read)
     end
 
+    it 'raise warning if multiple Geode Tomcat module jars are detected',
+       app_fixture: 'container_tomcat_geode_store',
+       cache_fixture: 'stub-geode-store-tomcat-multi-version.tar' do
+
+       component.compile
+
+       expect((sandbox + 'conf/context.xml').read)
+         .to eq(Pathname.new('spec/fixtures/container_tomcat8_geode_store_context_after.xml').read)
+    end
+
     it 'mutates server.xml',
        app_fixture: 'container_tomcat_geode_store',
        cache_fixture: 'stub-geode-store.tar' do

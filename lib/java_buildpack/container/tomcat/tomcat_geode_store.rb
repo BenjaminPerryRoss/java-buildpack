@@ -139,8 +139,11 @@ module JavaBuildpack
         geode_modules_tomcat_pattern = /geode-modules-tomcat(?<version>[0-9]+).*.jar/.freeze
         Dir.foreach(@droplet.sandbox + 'lib') do |file|
           if geode_modules_tomcat_pattern.match(file)
-            geode_tomcat_version = geode_modules_tomcat_pattern.match(file).named_captures['version']
-            break
+            if geode_tomcat_version.empty?
+              geode_tomcat_version = geode_modules_tomcat_pattern.match(file).named_captures['version']
+            else
+              raise 'Warning: Multiple versions of geode-modules-tomcat jar found.'
+
           end
         end
 
