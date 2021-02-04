@@ -93,10 +93,7 @@ describe JavaBuildpack::Container::TomcatGeodeStore do
        app_fixture: 'container_tomcat_geode_store',
        cache_fixture: 'stub-geode-store-tomcat-multi-version.tar' do
 
-       component.compile
-
-       expect((sandbox + 'conf/context.xml').read)
-         .to eq(Pathname.new('spec/fixtures/container_tomcat8_geode_store_context_after.xml').read)
+      expect { component.compile }.to raise_error RuntimeError, 'Multiple versions of geode-modules-tomcat jar found.'
     end
 
     it 'mutates server.xml',
